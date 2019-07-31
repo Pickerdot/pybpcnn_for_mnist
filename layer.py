@@ -1,5 +1,5 @@
 import numpy as np
-import function as fn
+import functions as fn
 
 
 class Loss:
@@ -7,7 +7,7 @@ class Loss:
         self.Loss = None
         self.dout = None
 
-    def forward(self, out, x):
+    def forward(self, out, t):
         self.Loss = 1/2 * np.sum((out - t)**2)
         self.dout = out - t
         return self.Loss
@@ -16,7 +16,7 @@ class Loss:
         return self.dout
 
 
-class BPneuron:
+class hidden_layer:
     def __init__(self, W, b, lr):
         # 入力側からの重みと自ニューロンへのバイアスの格納
         self.W = W
@@ -31,7 +31,7 @@ class BPneuron:
         self.x = None
         # 学習率の格納
         self.lr = lr
-        self.optimizer = SGD(lr)
+        self.optimizer = fn.SGD(lr)
 
     def forward(self, x):
         # x格納
@@ -39,26 +39,26 @@ class BPneuron:
         # y：活性値
         self.y = np.dot(x, self.W) + self.b
         # Z：ニューロンの出力
-        self.z = sigmoid(y)
-        return z
+        self.z = fn.sigmoid(self.y)
+        return self.z
 
     def backward(self, dz):
         # 出力部の逆伝搬（シグモイド版）
-        dy = sigmoid_grad(z) * dz
+        dy = fn.sigmoid_grad(self.z) * dz
         self.b_grad = dy
         self.W_grad = np.dot(self.x.T, dy)
-        dx = np.dot(dy, W.T)
+        dx = np.dot(dy, self.W.T)
 
-        print("dw:", self.W_grad)
-        print("W:", W)
+        #print("dw:", self.W_grad)
+        #print("W:", W)
 
         # オプティマイザーによりself.W、self.bの値を更新
         self.W = self.optimizer.update(self.W, self.W_grad)
         self.b = self.optimizer.update(self.b, self.b_grad)
 
-        print("W:", W)
+        #print("W:", W)
 
-        return dx self.b
+        return dx, dy, self.W, self.b
 
     def change_lr(self, New_lr):
         self.optimizer.change_lr(New_lr)
