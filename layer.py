@@ -31,7 +31,6 @@ class hidden_layer:
         self.x = None
         # 学習率の格納
         self.lr = lr
-        self.optimizer = fn.SGD(lr)
 
     def forward(self, x):
         # x格納
@@ -45,20 +44,21 @@ class hidden_layer:
     def backward(self, dz):
         # 出力部の逆伝搬（シグモイド版）
         dy = fn.sigmoid_grad(self.z) * dz
+        #print("dy:", dy)
+        #print("x.T:", self.x.T)
         self.b_grad = dy
         self.W_grad = np.dot(self.x.T, dy)
         dx = np.dot(dy, self.W.T)
-
         #print("dw:", self.W_grad)
-        #print("W:", W)
-
+        #print("W:", self.W)
+        W_tmp = self.W
+        #print("dW", np.sum(self.W_grad))
         # オプティマイザーによりself.W、self.bの値を更新
-        self.W = self.optimizer.update(self.W, self.W_grad)
-        self.b = self.optimizer.update(self.b, self.b_grad)
+        self.W = self.W - self.lr * self.W_grad
+        self.b = self.b - self.lr * self.b_grad
 
-        #print("W:", W)
+        #print("Wn-W", np.sum(self.W - Wn))
 
-        return dx, dy, self.W, self.b
+        #print("W:", self.W)
 
-    def change_lr(self, New_lr):
-        self.optimizer.change_lr(New_lr)
+        return dx
